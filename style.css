@@ -344,6 +344,28 @@ body.monitor-collapsed .chamados-monitor { display: none; }
 body.notes-hidden .workspace { grid-template-columns: 340px 1fr; }
 body.notes-hidden .notes-panel { display: none; }
 
+.monitor-reopen {
+  position: fixed;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  z-index: 2000;
+  cursor: pointer;
+}
+
+.monitor-reopen:hover { border-color: var(--primary); color: #fff; }
+body.monitor-collapsed .monitor-reopen { display: inline-flex; }
+
 main,
 .content-area {
   height: 100%;
