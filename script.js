@@ -420,13 +420,15 @@ const NotesPanel = (() => {
   const clearBtn = $("#notes-clear");
   const textarea = $("#notes-text");
 
-  function open() {
-    if (panel) panel.classList.add("open");
+  function show() {
+    if (panel) panel.classList.remove("hidden");
+    document.body.classList.remove("notes-hidden");
     if (textarea) textarea.focus();
   }
 
-  function close() {
-    if (panel) panel.classList.remove("open");
+  function hide() {
+    if (panel) panel.classList.add("hidden");
+    document.body.classList.add("notes-hidden");
   }
 
   function load() {
@@ -446,10 +448,13 @@ const NotesPanel = (() => {
   function init() {
     load();
     on(toggleBtn, "click", () => {
-      if (panel) panel.classList.toggle("open");
-      if (panel && panel.classList.contains("open") && textarea) textarea.focus();
+      if (panel && panel.classList.contains("hidden")) {
+        show();
+      } else {
+        hide();
+      }
     });
-    on(closeBtn, "click", close);
+    on(closeBtn, "click", hide);
     on(saveBtn, "click", save);
     on(clearBtn, "click", clear);
   }
