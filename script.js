@@ -1,6 +1,12 @@
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
 
+function on(element, event, handler) {
+  if (element) {
+    element.addEventListener(event, handler);
+  }
+}
+
 const storage = {
   get(key, fallback) {
     try {
@@ -49,14 +55,14 @@ const Dropdowns = (() => {
     if (openMenu) {
       openMenu.style.display = "none";
       const btn = document.querySelector(`[data-menu='${openMenu.id}']`);
-      btn?.setAttribute("aria-expanded", "false");
+      if (btn) btn.setAttribute("aria-expanded", "false");
     }
     openMenu = null;
   }
 
   function init() {
     $$(".toggle-button").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
+      on(btn, "click", (e) => {
         e.stopPropagation();
         toggle(btn);
       });
@@ -99,25 +105,25 @@ const ThemeManager = (() => {
     if (bgPicker) bgPicker.value = saved.background || defaults.background;
     if (bgInput) bgInput.value = saved.backgroundImage || "";
 
-    colorPicker?.addEventListener("input", () => {
+    on(colorPicker, "input", () => {
       const theme = { ...saved, primary: colorPicker.value };
       storage.set("theme", theme);
       apply(theme);
     });
 
-    bgPicker?.addEventListener("input", () => {
+    on(bgPicker, "input", () => {
       const theme = { ...saved, background: bgPicker.value };
       storage.set("theme", theme);
       apply(theme);
     });
 
-    bgInput?.addEventListener("change", () => {
+    on(bgInput, "change", () => {
       const theme = { ...saved, backgroundImage: bgInput.value.trim() };
       storage.set("theme", theme);
       apply(theme);
     });
 
-    clearBtn?.addEventListener("click", () => {
+    on(clearBtn, "click", () => {
       const theme = { ...saved, backgroundImage: "" };
       storage.set("theme", theme);
       apply(theme);
@@ -160,7 +166,7 @@ const RemoteManager = (() => {
   function attachPanelEvents(panel) {
     panel.addEventListener("click", () => setAudioFocus(panel));
     const closeBtn = panel.querySelector(".close-btn");
-    closeBtn?.addEventListener("click", (e) => {
+    on(closeBtn, "click", (e) => {
       e.stopPropagation();
       closePanel(panel);
     });
@@ -190,7 +196,7 @@ const RemoteManager = (() => {
     panels.push(wrapper);
     if (!audioPanel) setAudioFocus(wrapper);
 
-    container?.appendChild(wrapper);
+    if (container) container.appendChild(wrapper);
     setTimeout(() => iframe.focus({ preventScroll: true }), 150);
     wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -329,8 +335,10 @@ const TicketManager = (() => {
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-      const title = doc.querySelector("title")?.textContent || doc.querySelector("h1")?.textContent;
-      return title?.replace(/\s+\|.*$/, "").trim() || null;
+      const docTitle = doc.querySelector("title");
+      const heading = doc.querySelector("h1");
+      const title = docTitle ? docTitle.textContent : heading ? heading.textContent : null;
+      return title ? title.replace(/\s+\|.*$/, "").trim() : null;
     } catch (err) {
       console.warn("Não foi possível obter o título do chamado", err);
       return null;
@@ -358,8 +366,8 @@ const TicketManager = (() => {
 
   function handleAddForm(evt) {
     evt.preventDefault();
-    const id = inputId?.value.trim();
-    const desc = inputDesc?.value.trim();
+    const id = inputId ? inputId.value.trim() : "";
+    const desc = inputDesc ? inputDesc.value.trim() : "";
     if (!id) return;
     addTicket(id, desc);
     inputId.value = "";
@@ -389,15 +397,16 @@ const TicketManager = (() => {
     tickets = storage.get("tickets", []);
     render();
 
-    addForm?.addEventListener("submit", handleAddForm);
-    glpiAddBtn?.addEventListener("click", () => {
-      const id = $("#glpi-input")?.value.trim();
+    on(addForm, "submit", handleAddForm);
+    on(glpiAddBtn, "click", () => {
+      const glpiInput = $("#glpi-input");
+      const id = glpiInput ? glpiInput.value.trim() : "";
       if (!id) return;
       addTicket(id, "GLPI adicionado pelo topo");
     });
 
-    collapseBtn?.addEventListener("click", toggleMonitor);
-    logBtn?.addEventListener("click", generateLog);
+    on(collapseBtn, "click", toggleMonitor);
+    on(logBtn, "click", generateLog);
   }
 
   return { init, addTicket };
@@ -412,12 +421,12 @@ const NotesPanel = (() => {
   const textarea = $("#notes-text");
 
   function open() {
-    panel?.classList.add("open");
-    textarea?.focus();
+    if (panel) panel.classList.add("open");
+    if (textarea) textarea.focus();
   }
 
   function close() {
-    panel?.classList.remove("open");
+    if (panel) panel.classList.remove("open");
   }
 
   function load() {
@@ -426,7 +435,7 @@ const NotesPanel = (() => {
   }
 
   function save() {
-    storage.set("notes", textarea?.value || "");
+    storage.set("notes", textarea ? textarea.value : "");
   }
 
   function clear() {
@@ -436,13 +445,13 @@ const NotesPanel = (() => {
 
   function init() {
     load();
-    toggleBtn?.addEventListener("click", () => {
-      panel?.classList.toggle("open");
-      if (panel?.classList.contains("open")) textarea?.focus();
+    on(toggleBtn, "click", () => {
+      if (panel) panel.classList.toggle("open");
+      if (panel && panel.classList.contains("open") && textarea) textarea.focus();
     });
-    closeBtn?.addEventListener("click", close);
-    saveBtn?.addEventListener("click", save);
-    clearBtn?.addEventListener("click", clear);
+    on(closeBtn, "click", close);
+    on(saveBtn, "click", save);
+    on(clearBtn, "click", clear);
   }
 
   return { init };
@@ -451,20 +460,20 @@ const NotesPanel = (() => {
 const ConfigModal = (() => {
   const modal = $("#config-modal");
   const openBtn = $("#config-btn");
-  const closeBtn = modal?.querySelector(".close-btn");
+  const closeBtn = modal ? modal.querySelector(".close-btn") : null;
 
   function open() {
-    modal.style.display = "flex";
+    if (modal) modal.style.display = "flex";
   }
 
   function close() {
-    modal.style.display = "none";
+    if (modal) modal.style.display = "none";
   }
 
   function init() {
-    openBtn?.addEventListener("click", open);
-    closeBtn?.addEventListener("click", close);
-    modal?.addEventListener("click", (e) => {
+    on(openBtn, "click", open);
+    on(closeBtn, "click", close);
+    on(modal, "click", (e) => {
       if (e.target === modal) close();
     });
   }
@@ -475,9 +484,10 @@ const ConfigModal = (() => {
 const Search = (() => {
   function initGLPI() {
     const form = $("#glpi-form");
-    form?.addEventListener("submit", (e) => {
+    on(form, "submit", (e) => {
       e.preventDefault();
-      const value = $("#glpi-input")?.value.trim();
+      const input = $("#glpi-input");
+      const value = input ? input.value.trim() : "";
       if (!value) return;
       window.open(`https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(value)}`, "_blank", "noopener");
     });
@@ -485,9 +495,10 @@ const Search = (() => {
 
   function initWiki() {
     const form = $("#wiki-form");
-    form?.addEventListener("submit", (e) => {
+    on(form, "submit", (e) => {
       e.preventDefault();
-      const q = $("#wiki-input")?.value.trim();
+      const input = $("#wiki-input");
+      const q = input ? input.value.trim() : "";
       if (!q) return;
       window.open(`http://10.124.210.252/Wikifato/doku.php?do=search&q=${encodeURIComponent(q)}`, "_blank", "noopener");
     });
