@@ -506,4 +506,17 @@ function initApp() {
   Search.init();
 }
 
+if (typeof window !== "undefined") {
+  window.__app__ = {
+    initApp,
+    Dropdowns,
+    ThemeManager,
+    RemoteManager,
+    TicketManager,
+    NotesPanel,
+    ConfigModal,
+    Search,
+  };
+}
+
 document.addEventListener("DOMContentLoaded", initApp);
