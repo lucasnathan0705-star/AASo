@@ -434,6 +434,7 @@ const NotesPanel = (() => {
   const saveBtn = $("#notes-save");
   const clearBtn = $("#notes-clear");
   const textarea = $("#notes-text");
+  const status = $("#notes-status");
 
   function show() {
     if (panel) panel.classList.remove("hidden");
@@ -453,6 +454,12 @@ const NotesPanel = (() => {
 
   function save() {
     storage.set("notes", textarea ? textarea.value : "");
+    if (status) {
+      status.textContent = "Notas salvas";
+      setTimeout(() => {
+        status.textContent = "";
+      }, 2000);
+    }
   }
 
   function clear() {
@@ -472,6 +479,11 @@ const NotesPanel = (() => {
     on(closeBtn, "click", hide);
     on(saveBtn, "click", save);
     on(clearBtn, "click", clear);
+    if (textarea) {
+      on(textarea, "input", () => {
+        if (status) status.textContent = "";
+      });
+    }
   }
 
   return { init };
