@@ -1,0 +1,14 @@
+{
+  "name": "aaso-panel",
+  "version": "1.0.0",
+  "description": "Painel de suporte web",
+  "type": "commonjs",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jsdom": "^22.1.0",
+    "p-try": "2.2.0"
+  }
+}
