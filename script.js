@@ -234,6 +234,7 @@ const TicketManager = (() => {
   const monitor = $("#chamados-monitor");
   const collapseBtn = $("#monitor-collapse");
   const logBtn = $("#gerar-log-btn");
+  const reopenBtn = $("#monitor-reopen");
 
   let tickets = [];
 
@@ -243,6 +244,18 @@ const TicketManager = (() => {
 
   function updateCount() {
     countEl.textContent = tickets.length;
+  }
+
+  function setCollapsed(collapsed) {
+    if (!monitor) return;
+    monitor.classList.toggle("collapsed", collapsed);
+    document.body.classList.toggle("monitor-collapsed", collapsed);
+    const icon = collapseBtn ? collapseBtn.querySelector("i") : null;
+    if (icon) icon.className = collapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+  }
+
+  function ensureVisible() {
+    setCollapsed(false);
   }
 
   function render() {
@@ -315,6 +328,7 @@ const TicketManager = (() => {
     }
     save();
     render();
+    ensureVisible();
   }
 
   function removeTicket(id) {
@@ -324,6 +338,7 @@ const TicketManager = (() => {
   }
 
   function openTicket(id) {
+    addTicket(id);
     window.open(`https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(id)}`, "_blank", "noopener");
   }
 
@@ -387,15 +402,14 @@ const TicketManager = (() => {
   }
 
   function toggleMonitor() {
-    const collapsed = monitor.classList.toggle("collapsed");
-    document.body.classList.toggle("monitor-collapsed", collapsed);
-    const icon = collapseBtn.querySelector("i");
-    if (icon) icon.className = collapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+    const collapsed = monitor ? monitor.classList.contains("collapsed") : false;
+    setCollapsed(!collapsed);
   }
 
   function init() {
     tickets = storage.get("tickets", []);
     render();
+    setCollapsed(false);
 
     on(addForm, "submit", handleAddForm);
     on(glpiAddBtn, "click", () => {
@@ -406,6 +420,7 @@ const TicketManager = (() => {
     });
 
     on(collapseBtn, "click", toggleMonitor);
+    on(reopenBtn, "click", () => setCollapsed(false));
     on(logBtn, "click", generateLog);
   }
 
@@ -494,6 +509,7 @@ const Search = (() => {
       const input = $("#glpi-input");
       const value = input ? input.value.trim() : "";
       if (!value) return;
+      TicketManager.addTicket(value, "Buscado via GLPI");
       window.open(`https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(value)}`, "_blank", "noopener");
     });
   }
