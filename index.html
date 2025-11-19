@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Controle</title>
+
+    <!-- Ícones FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ======================================================
+         BARRA SUPERIOR (GLPI • REMOTE • WIKI)
+    ====================================================== -->
+    <header class="main-header">
+
+        <!-- ===================== ESQUERDA ===================== -->
+        <div class="header-left">
+
+            <!-- Botão Emporium -->
+            <button id="emporium-toggle" class="icon-button toggle-button" data-menu="emporium-menu" title="Emporium">
+                <i class="fas fa-store"></i>
+            </button>
+
+            <!-- MENU Emporium -->
+            <div id="emporium-menu" class="dropdown-menu">
+                <a href="https://pdvposto.muffato.com.br/index.php" target="_blank">Emporium Posto</a>
+                <a href="http://10.250.2.12/index.php" target="_blank">Emporium Max</a>
+                <a href="http://10.250.2.11/index.php" target="_blank">Emporium Varejo</a>
+            </div>
+
+            <!-- Campo GLPI -->
+            <div class="top-search left-box">
+                <input type="text" id="glpi-input" placeholder="GLPI: 000139">
+                <button id="glpi-btn" class="icon-btn"><i class="fas fa-search"></i></button>
+            </div>
+
+        </div>
+
+        <!-- ===================== CENTRO ===================== -->
+        <div class="header-center">
+            <button id="remote-toggle" class="remote-button toggle-button" data-menu="remote-menu">
+                <i class="fas fa-desktop"></i>
+                <span>REMOTE</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+
+            <!-- MENU Remote -->
+            <div id="remote-menu" class="dropdown-menu">
+                <a href="#" class="remote-link" data-name="Remote Cash" data-url="https://remotesup.muffato.com.br/#/client/MgBjAG15c3Fs">Remote Cash</a>
+                <a href="#" class="remote-link" data-name="Remote Varejo" data-url="https://remotesup.muffato.com.br/#/client/MQBjAG15c3Fs">Remote Varejo</a>
+                <a href="#" class="remote-link" data-name="Remote Posto" data-url="https://remotesup.muffato.com.br/#/client/NABjAG15c3Fs">Remote Posto</a>
+            </div>
+        </div>
+
+        <!-- ===================== DIREITA ===================== -->
+        <div class="header-right">
+
+            <!-- Campo WIKI -->
+            <div class="top-search right-box">
+                <input type="text" id="wiki-input" placeholder="WIKI: impressora, Scanner">
+                <button id="wiki-btn" class="icon-btn"><i class="fas fa-search"></i></button>
+            </div>
+
+            <!-- Botão Links Úteis -->
+            <button id="links-uteis-toggle" class="icon-button toggle-button" data-menu="links-uteis-menu" title="Links Úteis">
+                <i class="fas fa-link"></i>
+            </button>
+
+            <!-- MENU Links Úteis -->
+            <div id="links-uteis-menu" class="dropdown-menu">
+                <a href="http://10.124.210.252/Wikifato/doku.php?do=search" target="_blank">Wiki</a>
+                <a href="https://mantis-br.nttdata-solutions.com/app/#" target="_blank">Mantis</a>
+                <a href="https://portal.azure.com" target="_blank">Azure</a>
+                <a href="https://atualiza-etiquetas.muffato.com.br/atualiza-etiq/login" target="_blank">Etiquetas</a>
+            </div>
+
+            <!-- Botão Configuração -->
+            <button id="config-btn" class="icon-button" title="Personalização Visual">
+                <i class="fas fa-palette"></i>
+            </button>
+
+        </div>
+
+    </header>
+
+    <!-- ======================================================
+         MONITOR DE CHAMADOS LATERAL
+    ====================================================== -->
+    <aside class="chamados-monitor" id="chamados-monitor">
+
+        <div class="monitor-header">
+            <h3>Chamados</h3>
+            <span id="chamados-count" class="count-badge">0</span>
+        </div>
+
+        <div id="chamados-list" class="chamados-list"></div>
+
+        <div class="monitor-footer">
+            <button id="gerar-log-btn" class="full-width-button">
+                <i class="fas fa-file-export"></i> Gerar Relatório (.txt)
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- ======================================================
+         ÁREA PRINCIPAL (REMOTES)
+    ====================================================== -->
+    <main>
+        <section id="remote-panels-container"></section>
+    </main>
+
+    <!-- ======================================================
+         MODAL DE CONFIGURAÇÃO
+    ====================================================== -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>Personalização Visual</h3>
+
+            <div class="personalizacao-options">
+                <h4>Cor Principal</h4>
+                <input type="color" id="theme-color-picker" value="#A00000">
+
+                <h4>Cor de Fundo</h4>
+                <input type="color" id="bg-color-picker" value="#000000">
+
+                <h4>Imagem de Fundo</h4>
+                <input type="text" id="bg-image-url" placeholder="URL da imagem">
+                <button id="clear-bg-image-btn">Limpar Imagem</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================
+         RODAPÉ
+    ====================================================== -->
+    <footer class="main-footer">
+        𝟙.𝟛 陰陽𝕷☯𝓟阴阳 𝟙.𝟚
+    </footer>
+
+
+    <!-- SCRIPT -->
+    <script src="script.js"></script>
+
+</body>
+</html>
