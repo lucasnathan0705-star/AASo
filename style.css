@@ -334,9 +334,10 @@ button {
   gap: 16px;
   padding: 18px 22px 14px;
   height: calc(100vh - 118px);
-  max-width: 1480px;
-  margin: 0 auto;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
+  position: relative;
 }
 
 body.monitor-collapsed .workspace { grid-template-columns: 0 1fr 360px; }
@@ -390,13 +391,14 @@ main,
 }
 
 .panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
   overflow-y: auto;
   padding-right: 6px;
   flex: 1;
+  min-height: 0;
 }
 
 .remote-panel {
@@ -460,6 +462,12 @@ main,
 }
 
 .notes-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.notes-status {
+  min-height: 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
 
 /* Modal */
 .modal {
