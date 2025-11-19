@@ -10,113 +10,120 @@
 <body>
   <div class="app-shell">
     <header class="main-header" aria-label="Barra principal">
-      <div class="header-section header-left">
-        <button class="icon-button toggle-button" data-menu="emporium-menu" aria-expanded="false" title="Abrir Emporium">
-          <i class="fas fa-store"></i>
-          <span>Emporium</span>
-          <i class="fas fa-chevron-down caret"></i>
-        </button>
-        <div id="emporium-menu" class="dropdown-menu" role="menu">
-          <a href="https://pdvposto.muffato.com.br/index.php" target="_blank" rel="noopener">Emporium Posto</a>
-          <a href="http://10.250.2.12/index.php" target="_blank" rel="noopener">Emporium Max</a>
-          <a href="http://10.250.2.11/index.php" target="_blank" rel="noopener">Emporium Varejo</a>
+      <div class="header-inner">
+        <div class="header-section header-left">
+          <button class="icon-button toggle-button" data-menu="emporium-menu" aria-expanded="false" title="Abrir Emporium">
+            <i class="fas fa-store"></i>
+            <span>Emporium</span>
+            <i class="fas fa-chevron-down caret"></i>
+          </button>
+          <div id="emporium-menu" class="dropdown-menu" role="menu">
+            <a href="https://pdvposto.muffato.com.br/index.php" target="_blank" rel="noopener">Emporium Posto</a>
+            <a href="http://10.250.2.12/index.php" target="_blank" rel="noopener">Emporium Max</a>
+            <a href="http://10.250.2.11/index.php" target="_blank" rel="noopener">Emporium Varejo</a>
+          </div>
+
+          <form id="glpi-form" class="search-group" autocomplete="off">
+            <label class="sr-only" for="glpi-input">Buscar GLPI</label>
+            <input id="glpi-input" name="glpi" type="text" inputmode="numeric" placeholder="GLPI: 000139" />
+            <button type="submit" class="icon-btn" title="Buscar GLPI"><i class="fas fa-search"></i></button>
+            <button type="button" id="glpi-add-btn" class="icon-btn alt" title="Acompanhar chamado"><i class="fas fa-thumbtack"></i></button>
+          </form>
         </div>
 
-        <form id="glpi-form" class="search-group" autocomplete="off">
-          <label class="sr-only" for="glpi-input">Buscar GLPI</label>
-          <input id="glpi-input" name="glpi" type="text" inputmode="numeric" placeholder="GLPI: 000139" />
-          <button type="submit" class="icon-btn" title="Buscar GLPI"><i class="fas fa-search"></i></button>
-          <button type="button" id="glpi-add-btn" class="icon-btn alt" title="Acompanhar chamado"><i class="fas fa-thumbtack"></i></button>
-        </form>
-      </div>
-
-      <div class="header-section header-center">
-        <button id="remote-toggle" class="remote-button toggle-button" data-menu="remote-menu" aria-expanded="false">
-          <i class="fas fa-desktop"></i>
-          <span>Remote</span>
-          <i class="fas fa-chevron-down caret"></i>
-        </button>
-        <div id="remote-menu" class="dropdown-menu wide" role="menu">
-          <a href="#" class="remote-link" data-name="Remote Cash" data-url="https://remotesup.muffato.com.br/#/client/MgBjAG15c3Fs">Remote Cash</a>
-          <a href="#" class="remote-link" data-name="Remote Varejo" data-url="https://remotesup.muffato.com.br/#/client/MQBjAG15c3Fs">Remote Varejo</a>
-          <a href="#" class="remote-link" data-name="Remote Posto" data-url="https://remotesup.muffato.com.br/#/client/NABjAG15c3Fs">Remote Posto</a>
-        </div>
-        <button id="notes-toggle" class="icon-button" type="button" title="Abrir bloco de notas">
-          <i class="fas fa-note-sticky"></i>
-          <span>Notas</span>
-        </button>
-      </div>
-
-      <div class="header-section header-right">
-        <form id="wiki-form" class="search-group" autocomplete="off">
-          <label class="sr-only" for="wiki-input">Buscar WIKI</label>
-          <input id="wiki-input" name="wiki" type="text" placeholder="WIKI: impressora, scanner" />
-          <button type="submit" class="icon-btn" title="Buscar na Wiki"><i class="fas fa-search"></i></button>
-        </form>
-
-        <button class="icon-button toggle-button" data-menu="links-uteis-menu" aria-expanded="false" title="Links úteis">
-          <i class="fas fa-link"></i>
-          <span>Links</span>
-          <i class="fas fa-chevron-down caret"></i>
-        </button>
-        <div id="links-uteis-menu" class="dropdown-menu" role="menu">
-          <a href="http://10.124.210.252/Wikifato/doku.php?do=search" target="_blank" rel="noopener">Wiki</a>
-          <a href="https://mantis-br.nttdata-solutions.com/app/#" target="_blank" rel="noopener">Mantis</a>
-          <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure</a>
-          <a href="https://atualiza-etiquetas.muffato.com.br/atualiza-etiq/login" target="_blank" rel="noopener">Etiquetas</a>
+        <div class="header-section header-center">
+          <button id="remote-toggle" class="remote-button toggle-button" data-menu="remote-menu" aria-expanded="false">
+            <i class="fas fa-desktop"></i>
+            <span>Remote</span>
+            <i class="fas fa-chevron-down caret"></i>
+          </button>
+          <div id="remote-menu" class="dropdown-menu wide" role="menu">
+            <a href="#" class="remote-link" data-name="Remote Cash" data-url="https://remotesup.muffato.com.br/#/client/MgBjAG15c3Fs">Remote Cash</a>
+            <a href="#" class="remote-link" data-name="Remote Varejo" data-url="https://remotesup.muffato.com.br/#/client/MQBjAG15c3Fs">Remote Varejo</a>
+            <a href="#" class="remote-link" data-name="Remote Posto" data-url="https://remotesup.muffato.com.br/#/client/NABjAG15c3Fs">Remote Posto</a>
+          </div>
+          <button id="notes-toggle" class="icon-button" type="button" title="Alternar bloco de notas">
+            <i class="fas fa-note-sticky"></i>
+            <span>Notas</span>
+          </button>
         </div>
 
-        <button id="config-btn" class="icon-button" type="button" title="Personalização visual">
-          <i class="fas fa-sliders"></i>
-          <span>Config</span>
-        </button>
+        <div class="header-section header-right">
+          <form id="wiki-form" class="search-group" autocomplete="off">
+            <label class="sr-only" for="wiki-input">Buscar WIKI</label>
+            <input id="wiki-input" name="wiki" type="text" placeholder="WIKI: impressora, scanner" />
+            <button type="submit" class="icon-btn" title="Buscar na Wiki"><i class="fas fa-search"></i></button>
+          </form>
+
+          <button class="icon-button toggle-button" data-menu="links-uteis-menu" aria-expanded="false" title="Links úteis">
+            <i class="fas fa-link"></i>
+            <span>Links</span>
+            <i class="fas fa-chevron-down caret"></i>
+          </button>
+          <div id="links-uteis-menu" class="dropdown-menu" role="menu">
+            <a href="http://10.124.210.252/Wikifato/doku.php?do=search" target="_blank" rel="noopener">Wiki</a>
+            <a href="https://mantis-br.nttdata-solutions.com/app/#" target="_blank" rel="noopener">Mantis</a>
+            <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure</a>
+            <a href="https://atualiza-etiquetas.muffato.com.br/atualiza-etiq/login" target="_blank" rel="noopener">Etiquetas</a>
+          </div>
+
+          <button id="config-btn" class="icon-button" type="button" title="Personalização visual">
+            <i class="fas fa-sliders"></i>
+            <span>Config</span>
+          </button>
+        </div>
       </div>
     </header>
 
-    <aside class="chamados-monitor" id="chamados-monitor" aria-label="Chamados acompanhados">
-      <div class="monitor-header">
-        <div class="monitor-title">
-          <i class="fas fa-headset"></i>
-          <h3>Chamados</h3>
+    <div class="workspace">
+      <aside class="chamados-monitor" id="chamados-monitor" aria-label="Chamados acompanhados">
+        <div class="monitor-header">
+          <div class="monitor-title">
+            <i class="fas fa-headset"></i>
+            <h3>Acompanhar Chamados</h3>
+          </div>
+          <button id="monitor-collapse" class="icon-button ghost" type="button" title="Recolher/expandir lista">
+            <i class="fas fa-chevron-left"></i>
+          </button>
         </div>
-        <button id="monitor-collapse" class="icon-button ghost" type="button" title="Recolher/expandir lista">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-      </div>
 
-      <form id="novo-chamado-form" class="inline-form" autocomplete="off">
-        <label class="sr-only" for="novo-chamado-id">Número do chamado</label>
-        <input id="novo-chamado-id" type="text" inputmode="numeric" placeholder="Adicionar chamado" required />
-        <input id="novo-chamado-desc" type="text" placeholder="Descrição (opcional)" />
-        <button type="submit" class="icon-btn full"><i class="fas fa-plus"></i> Adicionar</button>
-      </form>
+        <form id="novo-chamado-form" class="inline-form" autocomplete="off">
+          <label class="sr-only" for="novo-chamado-id">Número do chamado</label>
+          <input id="novo-chamado-id" type="text" inputmode="numeric" placeholder="Adicionar chamado (nr)" required />
+          <input id="novo-chamado-desc" type="text" placeholder="Descrição (opcional)" />
+          <button type="submit" class="icon-btn full"><i class="fas fa-plus"></i> Adicionar</button>
+        </form>
 
-      <div class="monitor-subheader">
-        <span id="chamados-count" class="count-badge">0</span>
-        <button id="gerar-log-btn" class="ghost-link" type="button"><i class="fas fa-file-export"></i> Gerar Relatório (.txt)</button>
-      </div>
-
-      <div id="chamados-list" class="chamados-list" role="list"></div>
-    </aside>
-
-    <main>
-      <section id="remote-panels-container" class="panel-grid" aria-live="polite"></section>
-    </main>
-
-    <section id="notes-panel" class="notes-panel" aria-label="Bloco de notas">
-      <div class="notes-header">
-        <div class="notes-title">
-          <i class="fas fa-note-sticky"></i>
-          <span>Bloco de Notas</span>
+        <div class="monitor-subheader">
+          <span id="chamados-count" class="count-badge">0</span>
+          <button id="gerar-log-btn" class="ghost-link" type="button"><i class="fas fa-file-export"></i> Gerar relatório (.txt)</button>
         </div>
-        <button id="notes-close" class="icon-button ghost" type="button" title="Fechar notas"><i class="fas fa-times"></i></button>
-      </div>
-      <textarea id="notes-text" spellcheck="false" placeholder="Escreva aqui..."></textarea>
-      <div class="notes-actions">
-        <button id="notes-save" class="icon-btn full"><i class="fas fa-save"></i> Salvar</button>
-        <button id="notes-clear" class="icon-btn alt full" type="button"><i class="fas fa-eraser"></i> Limpar</button>
-      </div>
-    </section>
+
+        <div id="chamados-list" class="chamados-list" role="list"></div>
+      </aside>
+
+      <main class="content-area">
+        <section id="remote-panels-container" class="panel-grid" aria-live="polite"></section>
+      </main>
+
+      <section id="notes-panel" class="notes-panel open" aria-label="Bloco de notas">
+        <div class="notes-header">
+          <div class="notes-title">
+            <i class="fas fa-note-sticky"></i>
+            <div>
+              <strong>Bloco de notas</strong>
+              <small>conteúdo salvo localmente</small>
+            </div>
+          </div>
+          <button id="notes-close" class="icon-button ghost" type="button" title="Ocultar notas"><i class="fas fa-times"></i></button>
+        </div>
+        <textarea id="notes-text" spellcheck="false" placeholder="Escreva suas anotações aqui..."></textarea>
+        <div class="notes-actions">
+          <button id="notes-save" class="icon-btn full"><i class="fas fa-save"></i> Salvar</button>
+          <button id="notes-clear" class="icon-btn alt full" type="button"><i class="fas fa-eraser"></i> Limpar</button>
+        </div>
+      </section>
+    </div>
 
     <div id="config-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="config-title">
       <div class="modal-content">
