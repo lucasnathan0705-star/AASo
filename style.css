@@ -431,6 +431,20 @@ main,
   background: #0a0a0a;
 }
 
+.remote-fallback {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  background: linear-gradient(90deg, rgba(34, 34, 38, 0.95), rgba(28, 28, 32, 0.95));
+}
+
+.remote-fallback p { flex: 1; }
+.remote-fallback .icon-btn { width: auto; white-space: nowrap; }
+
 /* Notes Panel */
 .notes-panel {
   background: linear-gradient(180deg, rgba(24, 24, 28, 0.95), rgba(18, 18, 22, 0.95));

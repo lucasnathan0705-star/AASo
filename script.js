@@ -149,6 +149,7 @@ const RemoteManager = (() => {
     audioPanel = panel;
     panels.forEach((p) => {
       const iframe = p.querySelector("iframe");
+      if (!iframe) return;
       const desired = forceAudio(iframe.dataset.baseUrl, p === audioPanel);
       if (iframe.src !== desired) iframe.src = desired;
     });
@@ -164,7 +165,11 @@ const RemoteManager = (() => {
   }
 
   function attachPanelEvents(panel) {
-    panel.addEventListener("click", () => setAudioFocus(panel));
+    panel.addEventListener("click", () => {
+      setAudioFocus(panel);
+      const iframe = panel.querySelector("iframe");
+      if (iframe) setTimeout(() => iframe.focus({ preventScroll: true }), 0);
+    });
     const closeBtn = panel.querySelector(".close-btn");
     on(closeBtn, "click", (e) => {
       e.stopPropagation();
@@ -172,15 +177,10 @@ const RemoteManager = (() => {
     });
   }
 
-  function createPanel(title, url) {
+  function createPanel(title, url, options = {}) {
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
-
-    const iframe = document.createElement("iframe");
-    iframe.dataset.baseUrl = url;
-    iframe.setAttribute("sandbox", "allow-same-origin allow-scripts allow-forms allow-popups");
-    iframe.src = forceAudio(url, !audioPanel);
-    iframe.tabIndex = -1;
+    const { fallbackMessage } = options;
 
     wrapper.innerHTML = `
       <div class="panel-header">
@@ -190,14 +190,39 @@ const RemoteManager = (() => {
         </div>
       </div>
     `;
-    wrapper.appendChild(iframe);
+
+    if (fallbackMessage) {
+      const fallback = document.createElement("div");
+      fallback.className = "remote-fallback";
+      const text = document.createElement("p");
+      text.textContent = fallbackMessage;
+      const openBtn = document.createElement("button");
+      openBtn.className = "icon-btn alt";
+      openBtn.type = "button";
+      openBtn.innerHTML = '<i class="fas fa-up-right-from-square"></i> Abrir em nova aba';
+      openBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.open(url, "_blank", "noopener");
+      });
+      fallback.append(text, openBtn);
+      wrapper.appendChild(fallback);
+    } else {
+      const iframe = document.createElement("iframe");
+      iframe.dataset.baseUrl = url;
+      iframe.setAttribute("sandbox", "allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation allow-pointer-lock");
+      iframe.src = forceAudio(url, !audioPanel);
+      iframe.tabIndex = -1;
+      iframe.setAttribute("allow", "autoplay; clipboard-read; clipboard-write; fullscreen");
+      wrapper.appendChild(iframe);
+    }
 
     attachPanelEvents(wrapper);
     panels.push(wrapper);
     if (!audioPanel) setAudioFocus(wrapper);
 
     if (container) container.appendChild(wrapper);
-    setTimeout(() => iframe.focus({ preventScroll: true }), 150);
+    const iframe = wrapper.querySelector("iframe");
+    if (iframe) setTimeout(() => iframe.focus({ preventScroll: true }), 150);
     wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -214,7 +239,7 @@ const RemoteManager = (() => {
   function addPanel(options) {
     const { title, url } = options;
     if (!title || !url) return;
-    createPanel(title, url);
+    createPanel(title, url, options);
   }
 
   function init() {
@@ -363,6 +388,7 @@ const TicketManager = (() => {
   async function openTicketIframe(ticket) {
     const baseUrl = `https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(ticket.id)}`;
     let titleText = ticket.title;
+    const cannotEmbed = baseUrl.includes("suporte.muffato.com.br");
 
     if (!titleText) {
       titleText = await fetchTicketTitle(ticket.id);
@@ -373,8 +399,20 @@ const TicketManager = (() => {
       }
     }
 
+    const panelTitle = `GLPI ${ticket.id}${titleText ? ` • ${titleText}` : ""}`;
+
+    if (cannotEmbed) {
+      window.open(baseUrl, "_blank", "noopener");
+      RemoteManager.addPanel({
+        title: panelTitle,
+        url: baseUrl,
+        fallbackMessage: "O GLPI bloqueia exibição em iframe. Usar o botão para abrir em uma nova aba."
+      });
+      return;
+    }
+
     RemoteManager.addPanel({
-      title: `GLPI ${ticket.id}${titleText ? ` • ${titleText}` : ""}`,
+      title: panelTitle,
       url: baseUrl
     });
   }
