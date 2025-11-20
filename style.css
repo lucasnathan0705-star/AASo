@@ -431,6 +431,24 @@ main,
   background: #0a0a0a;
 }
 
+.panel-fallback {
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  color: var(--text);
+}
+
+.panel-fallback p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.panel-fallback small {
+  color: var(--muted);
+}
+
 /* Notes Panel */
 .notes-panel {
   background: linear-gradient(180deg, rgba(24, 24, 28, 0.95), rgba(18, 18, 22, 0.95));

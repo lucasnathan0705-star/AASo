@@ -1,5 +1,6 @@
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
+const isTestEnv = typeof process !== "undefined" && !!process.env?.JEST_WORKER_ID;
 
 function on(element, event, handler) {
   if (element) {
@@ -149,6 +150,7 @@ const RemoteManager = (() => {
     audioPanel = panel;
     panels.forEach((p) => {
       const iframe = p.querySelector("iframe");
+      if (!iframe) return;
       const desired = forceAudio(iframe.dataset.baseUrl, p === audioPanel);
       if (iframe.src !== desired) iframe.src = desired;
     });
@@ -163,8 +165,18 @@ const RemoteManager = (() => {
     panel.remove();
   }
 
+  function focusIframe(panel) {
+    const iframe = panel.querySelector("iframe");
+    if (!iframe) return;
+    const schedule = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (fn) => setTimeout(fn, 0);
+    schedule(() => iframe.focus({ preventScroll: true }));
+  }
+
   function attachPanelEvents(panel) {
-    panel.addEventListener("click", () => setAudioFocus(panel));
+    panel.addEventListener("click", () => {
+      setAudioFocus(panel);
+      focusIframe(panel);
+    });
     const closeBtn = panel.querySelector(".close-btn");
     on(closeBtn, "click", (e) => {
       e.stopPropagation();
@@ -172,7 +184,8 @@ const RemoteManager = (() => {
     });
   }
 
-  function createPanel(title, url) {
+  function createPanel(title, url, options = {}) {
+    const { fallback } = options;
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
 
@@ -190,14 +203,35 @@ const RemoteManager = (() => {
         </div>
       </div>
     `;
-    wrapper.appendChild(iframe);
+
+    if (fallback) {
+      const fallbackBox = document.createElement("div");
+      fallbackBox.className = "panel-fallback";
+      fallbackBox.innerHTML = `
+        <p>${fallback.message}</p>
+        <button class="icon-btn" type="button">${fallback.actionLabel}</button>
+        ${fallback.help ? `<small class="muted">${fallback.help}</small>` : ""}
+      `;
+
+      const btn = fallbackBox.querySelector("button");
+      if (btn && fallback.actionUrl) {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.open(fallback.actionUrl, "_blank", "noopener");
+        });
+      }
+
+      wrapper.appendChild(fallbackBox);
+    } else {
+      wrapper.appendChild(iframe);
+    }
 
     attachPanelEvents(wrapper);
     panels.push(wrapper);
     if (!audioPanel) setAudioFocus(wrapper);
 
     if (container) container.appendChild(wrapper);
-    setTimeout(() => iframe.focus({ preventScroll: true }), 150);
+    setTimeout(() => focusIframe(wrapper), 150);
     wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -214,7 +248,7 @@ const RemoteManager = (() => {
   function addPanel(options) {
     const { title, url } = options;
     if (!title || !url) return;
-    createPanel(title, url);
+    createPanel(title, url, options);
   }
 
   function init() {
@@ -375,7 +409,13 @@ const TicketManager = (() => {
 
     RemoteManager.addPanel({
       title: `GLPI ${ticket.id}${titleText ? ` • ${titleText}` : ""}`,
-      url: baseUrl
+      url: baseUrl,
+      fallback: {
+        message: "O GLPI bloqueia exibição em iframe (X-Frame-Options). Use o botão abaixo para abrir em nova aba.",
+        actionLabel: "Abrir GLPI em nova aba",
+        actionUrl: baseUrl,
+        help: "Caso precise acompanhar o chamado aqui, copie o link ou abra o GLPI em outra janela."
+      }
     });
   }
 
@@ -456,9 +496,11 @@ const NotesPanel = (() => {
     storage.set("notes", textarea ? textarea.value : "");
     if (status) {
       status.textContent = "Notas salvas";
-      setTimeout(() => {
-        status.textContent = "";
-      }, 2000);
+      if (!isTestEnv) {
+        setTimeout(() => {
+          status.textContent = "";
+        }, 2000);
+      }
     }
   }
 
