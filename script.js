@@ -172,6 +172,35 @@ const RemoteManager = (() => {
     });
   }
 
+  function createStatusArea(url) {
+    const status = document.createElement("div");
+    status.className = "panel-status";
+
+    const text = document.createElement("span");
+    text.className = "status-text";
+    status.appendChild(text);
+
+    const recovery = document.createElement("div");
+    recovery.className = "panel-recovery hidden";
+
+    const retry = document.createElement("button");
+    retry.className = "icon-btn ghost";
+    retry.type = "button";
+    retry.innerHTML = "<i class='fas fa-rotate'></i> Tentar novamente";
+
+    const external = document.createElement("a");
+    external.className = "icon-btn alt";
+    external.target = "_blank";
+    external.rel = "noopener";
+    external.href = url;
+    external.innerHTML = "<i class='fas fa-up-right-from-square'></i> Abrir em nova aba";
+
+    recovery.append(retry, external);
+    status.appendChild(recovery);
+
+    return { status, text, recovery, retry, external };
+  }
+
   function createPanel(title, url) {
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
@@ -179,8 +208,12 @@ const RemoteManager = (() => {
     const iframe = document.createElement("iframe");
     iframe.dataset.baseUrl = url;
     iframe.setAttribute("sandbox", "allow-same-origin allow-scripts allow-forms allow-popups");
+    iframe.setAttribute("allow", "clipboard-read; clipboard-write; encrypted-media; fullscreen");
+    iframe.loading = "lazy";
     iframe.src = forceAudio(url, !audioPanel);
-    iframe.tabIndex = -1;
+    iframe.tabIndex = 0;
+
+    const { status, text, recovery, retry } = createStatusArea(url);
 
     wrapper.innerHTML = `
       <div class="panel-header">
@@ -190,6 +223,7 @@ const RemoteManager = (() => {
         </div>
       </div>
     `;
+    wrapper.append(status);
     wrapper.appendChild(iframe);
 
     attachPanelEvents(wrapper);
@@ -199,6 +233,42 @@ const RemoteManager = (() => {
     if (container) container.appendChild(wrapper);
     setTimeout(() => iframe.focus({ preventScroll: true }), 150);
     wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const clearStatus = () => {
+      status.classList.remove("error");
+      text.textContent = "Conectado";
+      recovery.classList.add("hidden");
+      setTimeout(() => {
+        if (text.textContent === "Conectado") text.textContent = "";
+      }, 1500);
+    };
+
+    const showError = (message) => {
+      status.classList.add("error");
+      text.textContent = message;
+      recovery.classList.remove("hidden");
+    };
+
+    const loadingTimer = setTimeout(() => {
+      showError("Conexão lenta ou recusada. Abra em nova aba ou tente novamente.");
+    }, 8000);
+
+    iframe.addEventListener("load", () => {
+      clearTimeout(loadingTimer);
+      clearStatus();
+    });
+
+    iframe.addEventListener("error", () => {
+      clearTimeout(loadingTimer);
+      showError("Não foi possível carregar o painel (possível bloqueio ou indisponibilidade).");
+    });
+
+    on(retry, "click", (e) => {
+      e.stopPropagation();
+      text.textContent = "Reconectando...";
+      recovery.classList.add("hidden");
+      iframe.src = forceAudio(iframe.dataset.baseUrl, audioPanel === wrapper);
+    });
   }
 
   function bindRemoteLinks() {

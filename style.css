@@ -438,6 +438,28 @@ main,
 
 .panel-title { font-weight: 700; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
 
+.panel-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(18, 18, 22, 0.9);
+  border-bottom: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 36px;
+}
+
+.panel-status.error {
+  color: #ffb4b4;
+  background: rgba(56, 18, 18, 0.65);
+  border-bottom: 1px solid #8b2f2f;
+}
+
+.panel-recovery { display: flex; gap: 8px; }
+.panel-recovery.hidden { display: none; }
+
 .panel-actions { display: flex; gap: 8px; }
 
 .remote-panel iframe {
