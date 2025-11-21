@@ -79,6 +79,11 @@ describe('Painel de suporte', () => {
     window.__app__.RemoteManager.addPanel({
       title: 'Painel bloqueado',
       url: 'https://example.com/bloqueado',
+    const openSpy = window.open;
+
+    window.__app__.RemoteManager.addPanel({
+      title: 'GLPI',
+      url: 'https://suporte.muffato.com.br/front/ticket.form.php?id=123',
       fallbackMessage: 'bloqueado',
       forceFallback: true,
     });
@@ -105,6 +110,9 @@ describe('Painel de suporte', () => {
       '_blank',
       'noopener'
     );
+
+    panel.querySelector('button.icon-btn').click();
+    expect(openSpy).toHaveBeenCalled();
   });
 
   test('salva notas no bloco de notas', () => {
