@@ -139,6 +139,16 @@ const RemoteManager = (() => {
   const container = $("#remote-panels-container");
   let panels = [];
   let audioPanel = null;
+  const GLPI_HOST = "suporte.muffato.com.br";
+
+  function isGLPI(url) {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.hostname.includes(GLPI_HOST);
+    } catch (err) {
+      return (url || "").includes(GLPI_HOST);
+    }
+  }
 
   function forceAudio(url, enable) {
     const clean = url.replace(/([?&])audio=[^&#]+/g, "$1").replace(/([?&])$/, "");
@@ -290,6 +300,10 @@ const RemoteManager = (() => {
   function addPanel(options) {
     const { title, url } = options;
     if (!title || !url) return;
+    if (isGLPI(url)) {
+      window.open(url, "_blank", "noopener");
+      return;
+    }
     createPanel(title, url, options);
   }
 

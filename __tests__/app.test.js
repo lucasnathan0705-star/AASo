@@ -75,6 +75,10 @@ describe('Painel de suporte', () => {
 
   test('exibe fallback quando iframe não pode ser carregado', () => {
     const window = createDom();
+
+    window.__app__.RemoteManager.addPanel({
+      title: 'Painel bloqueado',
+      url: 'https://example.com/bloqueado',
     const openSpy = window.open;
 
     window.__app__.RemoteManager.addPanel({
@@ -87,6 +91,25 @@ describe('Painel de suporte', () => {
     const panel = window.document.querySelector('.remote-panel');
     expect(panel.querySelector('.remote-fallback')).not.toBeNull();
     expect(panel.querySelector('iframe')).toBeNull();
+  });
+
+  test('GLPI abre em nova aba e não cria iframe', () => {
+    const window = createDom();
+    const openSpy = window.open;
+
+    window.__app__.RemoteManager.addPanel({
+      title: 'GLPI',
+      url: 'https://suporte.muffato.com.br/front/ticket.form.php?id=123',
+      fallbackMessage: 'bloqueado',
+    });
+
+    const panel = window.document.querySelector('.remote-panel');
+    expect(panel).toBeNull();
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://suporte.muffato.com.br/front/ticket.form.php?id=123',
+      '_blank',
+      'noopener'
+    );
 
     panel.querySelector('button.icon-btn').click();
     expect(openSpy).toHaveBeenCalled();
