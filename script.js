@@ -149,6 +149,7 @@ const RemoteManager = (() => {
     audioPanel = panel;
     panels.forEach((p) => {
       const iframe = p.querySelector("iframe");
+      if (!iframe) return;
       const desired = forceAudio(iframe.dataset.baseUrl, p === audioPanel);
       if (iframe.src !== desired) iframe.src = desired;
     });
@@ -164,7 +165,11 @@ const RemoteManager = (() => {
   }
 
   function attachPanelEvents(panel) {
-    panel.addEventListener("click", () => setAudioFocus(panel));
+    panel.addEventListener("click", () => {
+      setAudioFocus(panel);
+      const iframe = panel.querySelector("iframe");
+      if (iframe) setTimeout(() => iframe.focus({ preventScroll: true }), 0);
+    });
     const closeBtn = panel.querySelector(".close-btn");
     on(closeBtn, "click", (e) => {
       e.stopPropagation();
@@ -172,15 +177,57 @@ const RemoteManager = (() => {
     });
   }
 
-  function createPanel(title, url) {
+  function showFallback(wrapper, url, fallbackMessage, onBlocked) {
+    if (!fallbackMessage || wrapper.classList.contains("has-fallback")) return;
+
+    wrapper.classList.add("has-fallback");
+
+    const existingIframe = wrapper.querySelector("iframe");
+    if (existingIframe) existingIframe.remove();
+
+    const fallback = document.createElement("div");
+    fallback.className = "remote-fallback";
+    const text = document.createElement("p");
+    text.textContent = fallbackMessage;
+    const openBtn = document.createElement("button");
+    openBtn.className = "icon-btn alt";
+    openBtn.type = "button";
+    openBtn.innerHTML = '<i class="fas fa-up-right-from-square"></i> Abrir em nova aba';
+    openBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      window.open(url, "_blank", "noopener");
+    });
+    fallback.append(text, openBtn);
+    wrapper.appendChild(fallback);
+
+    if (typeof onBlocked === "function") onBlocked();
+  }
+
+  function monitorIframe(iframe, wrapper, url, options) {
+    const { fallbackMessage, onBlocked } = options;
+    if (!fallbackMessage) return;
+
+    const detectBlock = () => {
+      try {
+        const doc = iframe.contentDocument;
+        const body = doc ? doc.body : null;
+        const emptyBody = !body || (!body.childElementCount && !body.textContent.trim());
+        const aboutBlank = !doc || doc.location.href === "about:blank";
+        if (aboutBlank || emptyBody) throw new Error("iframe sem conteúdo visível");
+      } catch (err) {
+        showFallback(wrapper, url, fallbackMessage, onBlocked);
+      }
+    };
+
+    iframe.addEventListener("error", detectBlock);
+    iframe.addEventListener("load", () => setTimeout(detectBlock, 50));
+    setTimeout(detectBlock, 2000);
+  }
+
+  function createPanel(title, url, options = {}) {
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
-
-    const iframe = document.createElement("iframe");
-    iframe.dataset.baseUrl = url;
-    iframe.setAttribute("sandbox", "allow-same-origin allow-scripts allow-forms allow-popups");
-    iframe.src = forceAudio(url, !audioPanel);
-    iframe.tabIndex = -1;
+    const { fallbackMessage, forceFallback, onBlocked } = options;
 
     wrapper.innerHTML = `
       <div class="panel-header">
@@ -190,14 +237,33 @@ const RemoteManager = (() => {
         </div>
       </div>
     `;
-    wrapper.appendChild(iframe);
+
+    if (!forceFallback) {
+      const iframe = document.createElement("iframe");
+      iframe.dataset.baseUrl = url;
+      iframe.setAttribute(
+        "sandbox",
+        "allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-presentation allow-pointer-lock allow-downloads allow-top-navigation-by-user-activation"
+      );
+      iframe.src = forceAudio(url, !audioPanel);
+      iframe.tabIndex = -1;
+      iframe.setAttribute("allow", "autoplay; clipboard-read; clipboard-write; fullscreen");
+      wrapper.appendChild(iframe);
+
+      monitorIframe(iframe, wrapper, url, { fallbackMessage, onBlocked });
+    }
+
+    if (forceFallback) {
+      showFallback(wrapper, url, fallbackMessage, onBlocked);
+    }
 
     attachPanelEvents(wrapper);
     panels.push(wrapper);
     if (!audioPanel) setAudioFocus(wrapper);
 
     if (container) container.appendChild(wrapper);
-    setTimeout(() => iframe.focus({ preventScroll: true }), 150);
+    const iframe = wrapper.querySelector("iframe");
+    if (iframe) setTimeout(() => iframe.focus({ preventScroll: true }), 150);
     wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -214,7 +280,7 @@ const RemoteManager = (() => {
   function addPanel(options) {
     const { title, url } = options;
     if (!title || !url) return;
-    createPanel(title, url);
+    createPanel(title, url, options);
   }
 
   function init() {
@@ -293,19 +359,13 @@ const TicketManager = (() => {
       openBtn.innerHTML = "<i class='fas fa-up-right-from-square'></i>";
       openBtn.addEventListener("click", () => openTicket(ticket.id));
 
-      const iframeBtn = document.createElement("button");
-      iframeBtn.className = "action-btn";
-      iframeBtn.title = "Abrir chamado em IFRAME";
-      iframeBtn.innerHTML = "<i class='fas fa-window-restore'></i>";
-      iframeBtn.addEventListener("click", () => openTicketIframe(ticket));
-
       const removeBtn = document.createElement("button");
       removeBtn.className = "action-btn";
       removeBtn.title = "Remover chamado";
       removeBtn.innerHTML = "<i class='fas fa-times'></i>";
       removeBtn.addEventListener("click", () => removeTicket(ticket.id));
 
-      actions.append(openBtn, iframeBtn, removeBtn);
+      actions.append(openBtn, removeBtn);
       item.append(meta, actions);
       listEl.appendChild(item);
     });
@@ -342,43 +402,6 @@ const TicketManager = (() => {
     window.open(`https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(id)}`, "_blank", "noopener");
   }
 
-  async function fetchTicketTitle(id) {
-    const url = `https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(id)}`;
-    try {
-      const res = await fetch(url, { mode: "cors" });
-      if (!res.ok) return null;
-      const html = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const docTitle = doc.querySelector("title");
-      const heading = doc.querySelector("h1");
-      const title = docTitle ? docTitle.textContent : heading ? heading.textContent : null;
-      return title ? title.replace(/\s+\|.*$/, "").trim() : null;
-    } catch (err) {
-      console.warn("Não foi possível obter o título do chamado", err);
-      return null;
-    }
-  }
-
-  async function openTicketIframe(ticket) {
-    const baseUrl = `https://suporte.muffato.com.br/front/ticket.form.php?id=${encodeURIComponent(ticket.id)}`;
-    let titleText = ticket.title;
-
-    if (!titleText) {
-      titleText = await fetchTicketTitle(ticket.id);
-      if (titleText) {
-        ticket.title = titleText;
-        save();
-        render();
-      }
-    }
-
-    RemoteManager.addPanel({
-      title: `GLPI ${ticket.id}${titleText ? ` • ${titleText}` : ""}`,
-      url: baseUrl
-    });
-  }
-
   function handleAddForm(evt) {
     evt.preventDefault();
     const id = inputId ? inputId.value.trim() : "";
@@ -410,6 +433,7 @@ const TicketManager = (() => {
     tickets = storage.get("tickets", []);
     render();
     setCollapsed(false);
+    setTimeout(() => setCollapsed(false), 50);
 
     on(addForm, "submit", handleAddForm);
     on(glpiAddBtn, "click", () => {
