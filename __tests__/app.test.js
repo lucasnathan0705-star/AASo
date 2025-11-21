@@ -71,6 +71,55 @@ describe('Painel de suporte', () => {
     const panels = window.document.querySelectorAll('.remote-panel');
     expect(panels.length).toBe(1);
     expect(panels[0].querySelector('iframe').src).toContain('https://example.com');
+    expect(panels[0].classList.contains('remote-window-fixed')).toBe(true);
+  });
+
+  test('mantem no máximo três janelas remotas fixas', () => {
+    const window = createDom();
+    const remote = window.__app__.RemoteManager;
+
+    remote.addPanel({ title: 'Um', url: 'https://example.com/1' });
+    remote.addPanel({ title: 'Dois', url: 'https://example.com/2' });
+    remote.addPanel({ title: 'Tres', url: 'https://example.com/3' });
+    remote.addPanel({ title: 'Quatro', url: 'https://example.com/4' });
+
+    const panels = window.document.querySelectorAll('.remote-panel');
+    expect(panels.length).toBe(3);
+    expect(Array.from(panels).every((panel) => panel.classList.contains('remote-window-fixed'))).toBe(true);
+  });
+
+  test('exibe fallback quando iframe não pode ser carregado', () => {
+    const window = createDom();
+
+    window.__app__.RemoteManager.addPanel({
+      title: 'Painel bloqueado',
+      url: 'https://example.com/bloqueado',
+      fallbackMessage: 'bloqueado',
+      forceFallback: true,
+    });
+
+    const panel = window.document.querySelector('.remote-panel');
+    expect(panel.querySelector('.remote-fallback')).not.toBeNull();
+    expect(panel.querySelector('iframe')).toBeNull();
+  });
+
+  test('GLPI abre em nova aba e não cria iframe', () => {
+    const window = createDom();
+    const openSpy = window.open;
+
+    window.__app__.RemoteManager.addPanel({
+      title: 'GLPI',
+      url: 'https://suporte.muffato.com.br/front/ticket.form.php?id=123',
+      fallbackMessage: 'bloqueado',
+    });
+
+    const panel = window.document.querySelector('.remote-panel');
+    expect(panel).toBeNull();
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://suporte.muffato.com.br/front/ticket.form.php?id=123',
+      '_blank',
+      'noopener'
+    );
   });
 
   test('salva notas no bloco de notas', () => {
