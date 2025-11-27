@@ -86,49 +86,53 @@ const ThemeManager = (() => {
     backgroundImage: ""
   };
 
-  function apply(theme) {
-    const { primary, background, backgroundImage } = { ...defaults, ...theme };
+  let theme = { ...defaults };
+
+  function apply(nextTheme) {
+    theme = { ...defaults, ...nextTheme };
+    const { primary, background, backgroundImage } = theme;
     document.documentElement.style.setProperty("--primary", primary);
     document.body.style.backgroundColor = background;
     document.body.style.backgroundImage = backgroundImage ? `url('${backgroundImage}')` : "none";
   }
 
+  function persist(nextTheme) {
+    storage.set("theme", nextTheme);
+    apply(nextTheme);
+  }
+
   function init() {
-    const saved = storage.get("theme", defaults);
-    apply(saved);
+    theme = storage.get("theme", defaults);
+    apply(theme);
 
     const colorPicker = $("#theme-color-picker");
     const bgPicker = $("#bg-color-picker");
     const bgInput = $("#bg-image-url");
     const clearBtn = $("#clear-bg-image-btn");
 
-    if (colorPicker) colorPicker.value = saved.primary || defaults.primary;
-    if (bgPicker) bgPicker.value = saved.background || defaults.background;
-    if (bgInput) bgInput.value = saved.backgroundImage || "";
+    if (colorPicker) colorPicker.value = theme.primary || defaults.primary;
+    if (bgPicker) bgPicker.value = theme.background || defaults.background;
+    if (bgInput) bgInput.value = theme.backgroundImage || "";
 
     on(colorPicker, "input", () => {
-      const theme = { ...saved, primary: colorPicker.value };
-      storage.set("theme", theme);
-      apply(theme);
+      const next = { ...theme, primary: colorPicker.value };
+      persist(next);
     });
 
     on(bgPicker, "input", () => {
-      const theme = { ...saved, background: bgPicker.value };
-      storage.set("theme", theme);
-      apply(theme);
+      const next = { ...theme, background: bgPicker.value };
+      persist(next);
     });
 
     on(bgInput, "change", () => {
-      const theme = { ...saved, backgroundImage: bgInput.value.trim() };
-      storage.set("theme", theme);
-      apply(theme);
+      const next = { ...theme, backgroundImage: bgInput.value.trim() };
+      persist(next);
     });
 
     on(clearBtn, "click", () => {
-      const theme = { ...saved, backgroundImage: "" };
-      storage.set("theme", theme);
-      apply(theme);
+      const next = { ...theme, backgroundImage: "" };
       if (bgInput) bgInput.value = "";
+      persist(next);
     });
   }
 
@@ -242,7 +246,6 @@ const RemoteManager = (() => {
     setTimeout(detectBlock, 2000);
   }
 
-  function createPanel(title, url, options = {}) {
   function createPanel(title, url, options = {}) {
     const { fallback } = options;
     const wrapper = document.createElement("article");
@@ -503,7 +506,7 @@ const NotesPanel = (() => {
   function save() {
     storage.set("notes", textarea ? textarea.value : "");
     if (status) {
-      status.textContent = "Notas salvas";
+      status.textContent = "Notas salvas (armazenadas neste navegador)";
       if (!isTestEnv) {
         setTimeout(() => {
           status.textContent = "";
