@@ -243,8 +243,6 @@ const RemoteManager = (() => {
   }
 
   function createPanel(title, url, options = {}) {
-  function createPanel(title, url, options = {}) {
-    const { fallback } = options;
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
     const { fallbackMessage, forceFallback, onBlocked } = options;
@@ -327,6 +325,7 @@ const TicketManager = (() => {
   const reopenBtn = $("#monitor-reopen");
 
   let tickets = [];
+  let collapsed = false;
 
   function save() {
     storage.set("tickets", tickets);
@@ -336,12 +335,17 @@ const TicketManager = (() => {
     countEl.textContent = tickets.length;
   }
 
-  function setCollapsed(collapsed) {
+  function setCollapsed(value) {
     if (!monitor) return;
+    collapsed = !!value;
     monitor.classList.toggle("collapsed", collapsed);
     document.body.classList.toggle("monitor-collapsed", collapsed);
     const icon = collapseBtn ? collapseBtn.querySelector("i") : null;
     if (icon) icon.className = collapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+  }
+
+  function isCollapsed() {
+    return collapsed;
   }
 
   function ensureVisible() {
@@ -449,7 +453,6 @@ const TicketManager = (() => {
   }
 
   function toggleMonitor() {
-    const collapsed = monitor ? monitor.classList.contains("collapsed") : false;
     setCollapsed(!collapsed);
   }
 
@@ -472,7 +475,7 @@ const TicketManager = (() => {
     on(logBtn, "click", generateLog);
   }
 
-  return { init, addTicket };
+  return { init, addTicket, setCollapsed, isCollapsed };
 })();
 
 const NotesPanel = (() => {
@@ -483,16 +486,23 @@ const NotesPanel = (() => {
   const clearBtn = $("#notes-clear");
   const textarea = $("#notes-text");
   const status = $("#notes-status");
+  let hidden = false;
 
   function show() {
     if (panel) panel.classList.remove("hidden");
     document.body.classList.remove("notes-hidden");
     if (textarea) textarea.focus();
+    hidden = false;
   }
 
   function hide() {
     if (panel) panel.classList.add("hidden");
     document.body.classList.add("notes-hidden");
+    hidden = true;
+  }
+
+  function isHidden() {
+    return hidden;
   }
 
   function load() {
@@ -518,9 +528,10 @@ const NotesPanel = (() => {
   }
 
   function init() {
+    hidden = panel?.classList.contains("hidden") || document.body.classList.contains("notes-hidden") || false;
     load();
     on(toggleBtn, "click", () => {
-      if (panel && panel.classList.contains("hidden")) {
+      if (hidden) {
         show();
       } else {
         hide();
@@ -536,7 +547,64 @@ const NotesPanel = (() => {
     }
   }
 
-  return { init };
+  return { init, show, hide, isHidden };
+})();
+
+const RemoteFocus = (() => {
+  const toggleBtn = $("#remote-focus-toggle");
+  let wasCollapsed = false;
+  let wasNotesHidden = false;
+  let active = false;
+
+  function updateButton() {
+    if (!toggleBtn) return;
+    toggleBtn.classList.toggle("active", active);
+    toggleBtn.setAttribute("aria-pressed", active ? "true" : "false");
+    const icon = toggleBtn.querySelector("i");
+    const label = toggleBtn.querySelector(".toggle-label");
+    if (icon) icon.className = active ? "fas fa-eye-slash" : "fas fa-eye";
+    if (label) label.textContent = active ? "Mostrar tudo" : "Somente Remote";
+  }
+
+  function focusOnlyRemote() {
+    wasCollapsed = TicketManager.isCollapsed();
+    wasNotesHidden = NotesPanel.isHidden();
+    TicketManager.setCollapsed(true);
+    NotesPanel.hide();
+    document.body.classList.add("remote-only");
+    active = true;
+    updateButton();
+  }
+
+  function restorePanels() {
+    document.body.classList.remove("remote-only");
+    TicketManager.setCollapsed(wasCollapsed);
+    if (wasNotesHidden) {
+      NotesPanel.hide();
+    } else {
+      NotesPanel.show();
+    }
+    active = false;
+    updateButton();
+  }
+
+  function toggle() {
+    if (active) {
+      restorePanels();
+    } else {
+      focusOnlyRemote();
+    }
+  }
+
+  function init() {
+    updateButton();
+    on(toggleBtn, "click", (e) => {
+      e.preventDefault();
+      toggle();
+    });
+  }
+
+  return { init, focusOnlyRemote, restorePanels };
 })();
 
 const ConfigModal = (() => {
@@ -596,6 +664,7 @@ function initApp() {
   RemoteManager.init();
   TicketManager.init();
   NotesPanel.init();
+  RemoteFocus.init();
   ConfigModal.init();
   Search.init();
 }
@@ -608,6 +677,7 @@ if (typeof window !== "undefined") {
     RemoteManager,
     TicketManager,
     NotesPanel,
+    RemoteFocus,
     ConfigModal,
     Search,
   };
