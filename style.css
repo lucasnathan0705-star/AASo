@@ -342,6 +342,10 @@ button {
   position: relative;
 }
 
+.workspace > * {
+  min-width: 0;
+}
+
 body.monitor-collapsed { --monitor-width: 0px; }
 body.monitor-collapsed .workspace {
   grid-template-columns: 0px minmax(0, 1fr) minmax(0, var(--notes-width));
@@ -589,7 +593,6 @@ main,
   :root { --monitor-width: 280px; }
   .main-header { grid-template-columns: 1.2fr 1fr 1.2fr; gap: 10px; }
   .chamados-monitor { width: var(--monitor-width); }
-  main { margin-left: var(--monitor-width); }
   .search-group input { min-width: 140px; }
 }
 
