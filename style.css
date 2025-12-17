@@ -332,7 +332,7 @@ button {
 /* Main */
 .workspace {
   display: grid;
-  grid-template-columns: var(--monitor-width) 1fr var(--notes-width);
+  grid-template-columns: minmax(0, var(--monitor-width)) minmax(0, 1fr) minmax(0, var(--notes-width));
   gap: 16px;
   padding: 18px 22px 14px;
   height: calc(100vh - 118px);
@@ -343,12 +343,23 @@ button {
 }
 
 body.monitor-collapsed { --monitor-width: 0px; }
+body.monitor-collapsed .workspace {
+  grid-template-columns: 0px minmax(0, 1fr) minmax(0, var(--notes-width));
+}
 body.monitor-collapsed .chamados-monitor { visibility: hidden; opacity: 0; pointer-events: none; }
+
 body.notes-hidden { --notes-width: 0px; }
+body.notes-hidden .workspace {
+  grid-template-columns: minmax(0, var(--monitor-width)) minmax(0, 1fr) 0px;
+}
 body.notes-hidden .notes-panel { visibility: hidden; opacity: 0; pointer-events: none; }
+
 body.monitor-collapsed.notes-hidden {
   --monitor-width: 0px;
   --notes-width: 0px;
+}
+body.monitor-collapsed.notes-hidden .workspace {
+  grid-template-columns: 0px minmax(0, 1fr) 0px;
 }
 
 .monitor-reopen {
@@ -384,7 +395,11 @@ main,
   box-shadow: var(--shadow);
 }
 
-.content-area { display: flex; flex-direction: column; }
+.content-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 
 .content-area::before {
   content: "";
