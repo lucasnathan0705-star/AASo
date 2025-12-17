@@ -243,7 +243,6 @@ const RemoteManager = (() => {
   }
 
   function createPanel(title, url, options = {}) {
-  function createPanel(title, url, options = {}) {
     const { fallback } = options;
     const wrapper = document.createElement("article");
     wrapper.className = "remote-panel";
@@ -314,6 +313,62 @@ const RemoteManager = (() => {
   return { init, addPanel };
 })();
 
+const RemoteFocus = (() => {
+  const toggleBtn = $("#remote-focus-toggle");
+  let active = false;
+  let wasMonitorCollapsed = false;
+  let wasNotesHidden = false;
+
+  function updateButton() {
+    if (!toggleBtn) return;
+    toggleBtn.classList.toggle("active", active);
+    toggleBtn.setAttribute("aria-pressed", String(active));
+    toggleBtn.title = active ? "Mostrar painéis laterais" : "Mostrar somente os remotes";
+  }
+
+  function applyState() {
+    const collapseIcon = $("#monitor-collapse i");
+    if (active) {
+      wasMonitorCollapsed = document.body.classList.contains("monitor-collapsed");
+      wasNotesHidden = document.body.classList.contains("notes-hidden");
+      document.body.classList.add("monitor-collapsed", "notes-hidden", "remote-focus");
+      if (collapseIcon) collapseIcon.className = "fas fa-chevron-right";
+    } else {
+      document.body.classList.remove("remote-focus");
+      document.body.classList.toggle("monitor-collapsed", wasMonitorCollapsed);
+      document.body.classList.toggle("notes-hidden", wasNotesHidden);
+      if (collapseIcon) collapseIcon.className = wasMonitorCollapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+    }
+    updateButton();
+  }
+
+  function toggle() {
+    active = !active;
+    applyState();
+  }
+
+  function disable() {
+    if (!active) return;
+    active = false;
+    applyState();
+  }
+
+  function isActive() {
+    return active;
+  }
+
+  function init() {
+    if (!toggleBtn) return;
+    updateButton();
+    on(toggleBtn, "click", (e) => {
+      e.preventDefault();
+      toggle();
+    });
+  }
+
+  return { init, isActive, disable };
+})();
+
 const TicketManager = (() => {
   const listEl = $("#chamados-list");
   const countEl = $("#chamados-count");
@@ -338,13 +393,16 @@ const TicketManager = (() => {
 
   function setCollapsed(collapsed) {
     if (!monitor) return;
-    monitor.classList.toggle("collapsed", collapsed);
-    document.body.classList.toggle("monitor-collapsed", collapsed);
+    const forceCollapsed = RemoteFocus.isActive && RemoteFocus.isActive();
+    const nextState = forceCollapsed ? true : collapsed;
+    monitor.classList.toggle("collapsed", nextState);
+    document.body.classList.toggle("monitor-collapsed", nextState);
     const icon = collapseBtn ? collapseBtn.querySelector("i") : null;
-    if (icon) icon.className = collapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+    if (icon) icon.className = nextState ? "fas fa-chevron-right" : "fas fa-chevron-left";
   }
 
   function ensureVisible() {
+    if (RemoteFocus.isActive && RemoteFocus.isActive()) RemoteFocus.disable();
     setCollapsed(false);
   }
 
@@ -450,6 +508,10 @@ const TicketManager = (() => {
 
   function toggleMonitor() {
     const collapsed = monitor ? monitor.classList.contains("collapsed") : false;
+    const willExpand = collapsed;
+    if (willExpand && RemoteFocus.isActive && RemoteFocus.isActive()) {
+      RemoteFocus.disable();
+    }
     setCollapsed(!collapsed);
   }
 
@@ -485,6 +547,9 @@ const NotesPanel = (() => {
   const status = $("#notes-status");
 
   function show() {
+    if (RemoteFocus.isActive && RemoteFocus.isActive()) {
+      RemoteFocus.disable();
+    }
     if (panel) panel.classList.remove("hidden");
     document.body.classList.remove("notes-hidden");
     if (textarea) textarea.focus();
@@ -593,6 +658,7 @@ const Search = (() => {
 function initApp() {
   ThemeManager.init();
   Dropdowns.init();
+  RemoteFocus.init();
   RemoteManager.init();
   TicketManager.init();
   NotesPanel.init();
@@ -606,6 +672,7 @@ if (typeof window !== "undefined") {
     Dropdowns,
     ThemeManager,
     RemoteManager,
+    RemoteFocus,
     TicketManager,
     NotesPanel,
     ConfigModal,

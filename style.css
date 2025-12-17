@@ -131,6 +131,12 @@ button {
 
 .remote-button:hover { filter: brightness(1.05); border-color: #0e7cd9; }
 .remote-button:active { transform: translateY(1px); }
+.icon-button.active,
+.focus-toggle.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(198, 40, 40, 0.5), var(--shadow);
+  background: rgba(198, 40, 40, 0.15);
+}
 
 .search-group {
   display: inline-flex;
@@ -373,6 +379,7 @@ body.monitor-collapsed.notes-hidden .workspace {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "main";
 }
+body.remote-focus .monitor-reopen { display: none; }
 
 .monitor-reopen {
   position: fixed;
