@@ -9,6 +9,8 @@
   --border: #2e2e2e;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   --radius: 10px;
+  --monitor-width: 340px;
+  --notes-width: 360px;
 }
 
 * {
@@ -330,7 +332,7 @@ button {
 /* Main */
 .workspace {
   display: grid;
-  grid-template-columns: 340px 1fr 360px;
+  grid-template-columns: var(--monitor-width) 1fr var(--notes-width);
   gap: 16px;
   padding: 18px 22px 14px;
   height: calc(100vh - 118px);
@@ -340,10 +342,14 @@ button {
   position: relative;
 }
 
-body.monitor-collapsed .workspace { grid-template-columns: 340px 1fr 360px; }
+body.monitor-collapsed { --monitor-width: 0px; }
 body.monitor-collapsed .chamados-monitor { visibility: hidden; opacity: 0; pointer-events: none; }
-body.notes-hidden .workspace { grid-template-columns: 340px 1fr 360px; }
+body.notes-hidden { --notes-width: 0px; }
 body.notes-hidden .notes-panel { visibility: hidden; opacity: 0; pointer-events: none; }
+body.monitor-collapsed.notes-hidden {
+  --monitor-width: 0px;
+  --notes-width: 0px;
+}
 
 .monitor-reopen {
   position: fixed;
